@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "37713127354",
+    "firebase_url": "https://fir-appriori.firebaseio.com",
+    "project_id": "firebase-appriori",
+    "storage_bucket": "firebase-appriori.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:37713127354:android:ae7683f866ac2a2d",
+        "android_client_info": {
+          "package_name": "com.example.gerardth.appriori"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "37713127354-kgvtve7soalggb01a1n82hi79tg9p1dc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gerardth.appriori",
+            "certificate_hash": "C482B92A41FD549E606968261DB8D2B7B80B69E2"
+          }
+        },
+        {
+          "client_id": "37713127354-pjrgomiu93tp3409dar3cf43vn5bjdk3.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "37713127354-7tvdbj2p3dhhm5ltf33ia2bq4t07j9tq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDglIy4jjL_g7k5vFUCG87hoKieqfl0AXc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "37713127354-pjrgomiu93tp3409dar3cf43vn5bjdk3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Appriori</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="facebook_app_id">1226194414104106</string>
+    <string name="cancel_login">Login cancelado.</string>
+    <string name="error_login">Hubo un error al intentar iniciar sesión.</string>
+    <string name="success_login">Login completo.</string>
+    <string name="info_incomplete">Hay espacios vacíos. Por favor llenar todos los campos.</string>
+    <string name="info_complete">La información ha sido agregada satisfactoriamente.</string>
+    <string name="distance">4</string>
+</resources>

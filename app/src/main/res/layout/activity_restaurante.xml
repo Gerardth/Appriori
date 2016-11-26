@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/nombre"
+        android:hint="Nombre del Restaurante" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/direccion"
+        android:hint="Dirección" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/descripcion"
+        android:layout_weight="0.12"
+        android:hint="Descripción del Restaurante" />
+
+    <fragment
+        android:id="@+id/mapRestaurante"
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:name="com.google.android.gms.maps.MapFragment" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Terminado"
+        android:id="@+id/crear"
+        android:layout_gravity="center_horizontal"
+        android:onClick="crearRestaurante"
+        android:nestedScrollingEnabled="true" />
+</LinearLayout>

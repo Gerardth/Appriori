@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/sopa"
+        android:hint="Sopas(s) a ofrecer"
+        android:layout_weight="0.07" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/entrada"
+        android:layout_weight="0.07"
+        android:hint="Entrada(s) a ofrecer" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/proteina"
+        android:layout_weight="0.07"
+        android:hint="Proteína(s) a ofrecer" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/jugo"
+        android:layout_weight="0.07"
+        android:hint="Jugo(s) a ofrecer" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Agregar menú"
+        android:id="@+id/agregarMenu"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.07"
+        android:onClick="crearMenu" />
+</LinearLayout>
