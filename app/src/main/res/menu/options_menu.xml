@@ -1,4 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/settings"
-        android:title="Settings"  />
+    <item android:id="@+id/cerrarSesion"
+        android:title="Cerrar sesión"  />
+    <item android:id="@+id/lista"
+        android:title="Mostrar lista de Restaurantes"  />
 </menu>

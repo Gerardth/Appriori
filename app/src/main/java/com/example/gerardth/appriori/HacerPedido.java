@@ -9,11 +9,17 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.gerardth.appriori.MapsActivity;
+import com.example.gerardth.appriori.database.FirebaseDB;
+import com.example.gerardth.appriori.objects.Pedido;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class HacerPedido extends AppCompatActivity {
 
     public Spinner spinnerSopa, spinnerEntrada, spinnerProteina, spinnerJugo;
     String sopa, entrada, proteina, jugo;
+    FirebaseDB firebase;
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +29,6 @@ public class HacerPedido extends AppCompatActivity {
         spinnerEntrada = (Spinner)findViewById(R.id.spinnerEntrada);
         spinnerProteina = (Spinner)findViewById(R.id.spinnerProteina);
         spinnerJugo = (Spinner)findViewById(R.id.spinnerJugo);
-
-        /*sopa = spinnerSopa.getSelectedItem().toString();
-        eventos = Ivento.darInstancia().filtrarEventos(filtro);*/
 
         spinnerSopa.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {// cuando se cambia el filtro
             @Override
@@ -80,10 +83,10 @@ public class HacerPedido extends AppCompatActivity {
         else {
             //TODO ARMAR EL PEDIDO PARA ENVIARLO A LA DB
             Toast.makeText(getApplicationContext(), R.string.info_complete, Toast.LENGTH_SHORT).show();
+            Pedido pedido = new Pedido(sopa, entrada, proteina, jugo);
+            firebase.crearPedido(user.getUid(), pedido);
             Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
             startActivity(intent);
-            //showDialog("Informadión agregada", "La información del crearRestaurante ha sido agregada satisfactoriamente. " +
-            //"A continuación, ingrese el menú que va a ofrecer.", CrearMenu.class);
         }
     }
 

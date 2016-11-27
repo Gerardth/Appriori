@@ -4,10 +4,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -18,9 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.example.gerardth.appriori.objects.Appriori;
 import com.example.gerardth.appriori.objects.Restaurante;
-import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -42,6 +38,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
@@ -50,16 +48,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private CameraUpdate camara = null;
-    public LatLng centro = new LatLng(4.601586, -74.065274);
+    public LatLng centro;
     private ArrayList<Restaurante> restaurantes;
     GoogleApiClient apiClient;
     private LocationRequest locRequest;
 
-    public String distance;
-    private SharedPreferences mPrefs;
-
     private static final int PETICION_PERMISO_LOCALIZACION = 101;
     private static final int PETICION_CONFIG_UBICACION = 201;
+
+    private FirebaseDatabase reference = FirebaseDatabase.getInstance();
+    private DatabaseReference mDatabase;
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
     /*https://developer.android.com/training/implementing-navigation/nav-drawer.html
     https://developers.google.com/maps/documentation/android-api/infowindows?hl=es-419#info_window_events
     http://www.sgoliver.net/blog/animaciones-basicas-coordinatorlayout/*/
@@ -69,25 +69,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null){
-            String name = user.getDisplayName();
-            String email = user.getEmail();
-            String uid = user.getUid();
-            Uri photoUrl = user.getPhotoUrl();
-        }else{
-            goLogin();
-        }
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        restaurantes = Appriori.darInstancia().getRestaurante();
-
-        mPrefs = getSharedPreferences("ttt_prefs", MODE_PRIVATE);
-        distance = mPrefs.getString("distance_places", getResources().getString(R.string.distance));
 
         apiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
@@ -96,10 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
     }
 
-    private void logout(){
-        FirebaseAuth.getInstance().signOut();
-        LoginManager.getInstance().logOut();
-        goLogin();
+    public ArrayList<Restaurante> obtenerRestaurante(){
+        return null;
     }
 
     private void goLogin(){
@@ -121,7 +104,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             mMap.setMyLocationEnabled(true);
         }
-        camara = CameraUpdateFactory.newLatLngZoom(centro, 17);
+        if(centro != null) camara = CameraUpdateFactory.newLatLngZoom(centro,18);
+        else  camara = CameraUpdateFactory.newLatLngZoom(new LatLng(4.601586, -74.065274), 18);
         mMap.animateCamera(camara);
     }
 
@@ -189,8 +173,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void crearMarcadores(ArrayList<Restaurante> list) {
-        for (int i = 0; i < list.size(); i++) {
-            marcadorGrande(list.get(i).coord, list.get(i).nombre, list.get(i).descripcion);
+        if(list != null){
+            for (int i = 0; i < list.size(); i++) {
+                marcadorGrande(list.get(i).coord, list.get(i).nombre, list.get(i).descripcion);
+            }
         }
     }
 
@@ -229,9 +215,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
         crearMapa();
         crearMarcadores(restaurantes);
     }
@@ -328,8 +311,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
-            case R.id.settings:
-                startActivityForResult(new Intent(this, Settings.class), 0);
+            case R.id.cerrarSesion:
+                FirebaseAuth.getInstance().signOut();
+                goLogin();
+                return true;
+            case R.id.lista:
+                Intent i = new Intent(this, ListActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
                 return true;
         }
         return false;

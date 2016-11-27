@@ -14,10 +14,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.gerardth.appriori.database.FirebaseDB;
 import com.example.gerardth.appriori.objects.Appriori;
 import com.example.gerardth.appriori.objects.Restaurante;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,23 +29,28 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener,
-        GoogleApiClient.ConnectionCallbacks {
+        GoogleApiClient.ConnectionCallbacks, LocationListener {
 
     Restaurante restaurante;
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     private static final int PETICION_PERMISO_LOCALIZACION = 101;
 
     private GoogleMap mMap;
     private CameraUpdate camara = null;
-    public LatLng centro = new LatLng(4.601586, -74.065274);
+    public LatLng centro;
     public LatLng coord = centro;
     GoogleApiClient apiClient;
 
     EditText txtNombre;
     EditText txtDescripcion;
     EditText txtDireccion;
+
+    FirebaseDB firebase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,26 +66,10 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
                 .addApi(LocationServices.API)
                 .build();
     }
-/*
-    private void showDialog(String title, String message, final Class clase) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle(title);
-        alertDialog.setCancelable(false);
-        alertDialog.setMessage(message);
-        alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                Intent intent = new Intent(getApplicationContext(), clase);
-                startActivity(intent);
-            }
-        });
-        AlertDialog dialog= alertDialog.create();
-        dialog.show();
-    }
-*/
+
     private void editarMapa() {
 
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);//Seteamos el tipo de mapa
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);//Seteamos el tipo de mapa
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -87,7 +78,8 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
         } else {
             // Show rationale and request permission.
         }
-        camara = CameraUpdateFactory.newLatLngZoom(centro,18);
+        if(centro != null) camara = CameraUpdateFactory.newLatLngZoom(centro,18);
+        else  camara = CameraUpdateFactory.newLatLngZoom(new LatLng(4.601586, -74.065274), 18);
         mMap.animateCamera(camara);
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -130,21 +122,15 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
         String nombre = txtNombre.getText().toString();
         String descripcion = txtDescripcion.getText().toString();
         String direccion = txtDireccion.getText().toString();
-        String id = "temporal";
 
         if(nombre.equals("") || descripcion.equals("") || direccion.equals("") || coord == centro ){
             Toast.makeText(getApplicationContext(), R.string.info_incomplete, Toast.LENGTH_SHORT).show();
-            //showDialog("Valores vacíos", "Ingrese todos los valores correctamente.", MainActivity.class);
         }
         else {
-            restaurante = new Restaurante(null, nombre, descripcion, direccion, coord, null);
-            Appriori.darInstancia().agregarRestaurante(restaurante);
+            firebase.crearRestaurante(nombre, descripcion, direccion, coord);
             Toast.makeText(getApplicationContext(), R.string.info_complete, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getApplicationContext(), CrearMenu.class);
-            intent.putExtra("nombreRestaurante", nombre);
             startActivity(intent);
-            //showDialog("Informadión agregada", "La información del crearRestaurante ha sido agregada satisfactoriamente. " +
-                    //"A continuación, ingrese el menú que va a ofrecer.", CrearMenu.class);
         }
     }
 
@@ -167,10 +153,7 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
             Location lastLocation =
                     LocationServices.FusedLocationApi.getLastLocation(apiClient);
             centro = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-            System.out.println("CENTROOOO " + centro);
-
         }
-        //...
     }
 
     @Override
@@ -202,5 +185,11 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
         //Se ha interrumpido la conexión con Google Play Services
 
         Toast.makeText(getApplicationContext(), "Se ha interrumpido la conexión con Google Play services", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+        centro = new LatLng(location.getLatitude(), location.getLongitude());
     }
 }

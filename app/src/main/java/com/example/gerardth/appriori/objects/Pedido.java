@@ -8,7 +8,6 @@ public class Pedido {
 
     String sopa, entrada, proteina, jugo;
 
-    public Pedido(){}
 
     public Pedido (String sopa, String entrada, String proteina, String jugo){
         this.sopa = sopa;

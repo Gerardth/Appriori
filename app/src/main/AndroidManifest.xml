@@ -72,6 +72,11 @@
             android:name=".HacerPedido"
             android:label="Hacer pedido" >
         </activity>
+
+        <activity
+            android:name=".ListActivity"
+            android:label="Lista de restaurantes" >
+        </activity>
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package com.example.gerardth.appriori;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -53,10 +54,9 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseDatabase reference;
+    FirebaseDB firebase;
+    private FirebaseDatabase reference = FirebaseDatabase.getInstance();
     private DatabaseReference mDatabase;
-    private FirebaseUser user;
-    private FirebaseDB db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +102,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
-                //.requestIdToken("653457805140-lu32cg5ttv0j1hjdjbk73urhp7vnrt53.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
 
@@ -115,9 +114,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
         //FIREBASE
         mAuth = FirebaseAuth.getInstance();
-        //user = FirebaseAuth.getInstance().getCurrentUser();
-        reference = FirebaseDatabase.getInstance();
-        mDatabase = reference.getReference("Usuarios");
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -125,7 +121,8 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    //TODO mirar el tipo de susario que esta logueado para dirigir a donde debe ir
+                    Toast.makeText(getApplicationContext(), "LOGUEADO " + user, Toast.LENGTH_SHORT).show();
+                    //preguntarTipo();
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -161,16 +158,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-
-                        if(true){
-                            //db.createUser(user);
-                        }
-                        Intent intent = new Intent(Login.this, MapsActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+                        preguntarTipo();
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(Login.this, "Authentication failed.",
@@ -180,8 +168,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                     }
                 });
     }
-
-
 
     /*----------------------------GOOGLE-------------------------------------*/
 
@@ -209,27 +195,16 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
 
-            /*try{
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-                GoogleSignInAccount account = result.getSignInAccount();//error
-                firebaseAuthWithGoogle(account);
-            }catch(Exception e){
-                e.printStackTrace();
-            }*/
-
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);//error
             if (result.isSuccess()) {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
-                System.out.println("HOLAAAAAA" + account);
                 firebaseAuthWithGoogle(account);
 
             } else {
-                Toast.makeText(getApplicationContext(), "No se pudo", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getApplicationContext(), R.string.error_login, Toast.LENGTH_SHORT).show();
             }
         }
-
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -242,11 +217,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                        Intent intent = new Intent(Login.this, MapsActivity.class);
-                        startActivity(intent);
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+                        preguntarTipo();
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(Login.this, "Authentication failed.",
@@ -264,11 +235,48 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
             if (v instanceof TextView) {
                 TextView tv = (TextView) v;
-                tv.setTextSize(15);
+                tv.setTextSize(14);
                 tv.setTypeface(null, Typeface.BOLD);
                 tv.setText(buttonText);
                 return;
             }
         }
+    }
+    private void preguntarTipo(){
+        new android.app.AlertDialog.Builder(this)
+                .setMessage("¿Es usted dueño de un restaurante?")
+                .setCancelable(false)
+                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        crearUsuario("dueño");
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id){
+                        crearUsuario("usuario");
+                    }
+                })
+                .show();
+    }
+
+    public void crearUsuario(String tipo) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mDatabase = reference.getReference("Usuarios").child(user.getUid());
+        //Usuario usuario = new Usuario(user.getDisplayName(), user.getEmail(), tipo);
+
+        mDatabase.child("nombre").setValue(user.getDisplayName());
+        mDatabase.child("correo").setValue(user.getEmail());
+        mDatabase.child("tipo").setValue(tipo);
+        System.out.println("TIPOOOOOOOO " + mDatabase.child("tipo").toString());
+
+        Intent intent;
+        if(tipo.equals("dueño")){
+            intent = new Intent(Login.this, CrearRestaurante.class);
+        }else{
+            intent = new Intent(Login.this, MapsActivity.class);
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+
     }
 }
