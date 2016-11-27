@@ -38,10 +38,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks, LocationListener {
@@ -49,12 +54,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private CameraUpdate camara = null;
     public LatLng centro;
-    private ArrayList<Restaurante> restaurantes;
+    private ArrayList<Restaurante> restaurantes = new ArrayList<>();
     GoogleApiClient apiClient;
     private LocationRequest locRequest;
 
     private static final int PETICION_PERMISO_LOCALIZACION = 101;
     private static final int PETICION_CONFIG_UBICACION = 201;
+    private static final String TAG = "Maps Activity";
 
     private FirebaseDatabase reference = FirebaseDatabase.getInstance();
     private DatabaseReference mDatabase;
@@ -79,10 +85,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .addConnectionCallbacks(this)
                 .addApi(LocationServices.API)
                 .build();
+
+        mDatabase = reference.getReference("restaurantes");
+        Query restauranteQuery = mDatabase.orderByChild("coordenadas");
+        restauranteQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                limpiar();
+                Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+                while(iterator.hasNext()){
+                    DataSnapshot snap = iterator.next();
+                    LatLng coord = new LatLng(Double.parseDouble(snap.child("coordenadas").child("latitud").getValue().toString()),
+                            Double.parseDouble(snap.child("coordenadas").child("longitud").getValue().toString()));
+                    Restaurante rest = new Restaurante(null, snap.child("nombre").getValue().toString(),
+                            snap.child("descripcion").getValue().toString(), null, coord, null);
+                    agregar(rest);
+                }
+                crearMarcadores(obtenerRestaurantes());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
-    public ArrayList<Restaurante> obtenerRestaurante(){
-        return null;
+    public void limpiar(){ restaurantes.clear(); }
+
+    public void agregar(Restaurante restaurante){
+        restaurantes.add(restaurante);
+    }
+
+    public ArrayList<Restaurante> obtenerRestaurantes(){
+        return restaurantes;
     }
 
     private void goLogin(){
@@ -93,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void crearMapa() {
 
-        //map.setMapType(GoogleMap.MAP_TYPE_HYBRID);//Seteamos el tipo de mapa
+        mMap.clear();
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);//Seteamos el tipo de mapa
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
@@ -105,7 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
         if(centro != null) camara = CameraUpdateFactory.newLatLngZoom(centro,18);
-        else  camara = CameraUpdateFactory.newLatLngZoom(new LatLng(4.601586, -74.065274), 18);
+        else  camara = CameraUpdateFactory.newLatLngZoom(new LatLng(4.636130555880344, -74.08310115337372), 15);
         mMap.animateCamera(camara);
     }
 
@@ -173,6 +209,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void crearMarcadores(ArrayList<Restaurante> list) {
+        mMap.clear();
         if(list != null){
             for (int i = 0; i < list.size(); i++) {
                 marcadorGrande(list.get(i).coord, list.get(i).nombre, list.get(i).descripcion);
@@ -314,9 +351,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case R.id.cerrarSesion:
                 FirebaseAuth.getInstance().signOut();
                 goLogin();
+
                 return true;
             case R.id.lista:
-                Intent i = new Intent(this, ListActivity.class);
+                Intent i = new Intent(this, ListaRestaurantes.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
                 return true;

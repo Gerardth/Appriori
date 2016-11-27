@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.gerardth.appriori.database.FirebaseDB;
 import com.example.gerardth.appriori.objects.Restaurante;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,7 +20,7 @@ import java.util.List;
  * Created by Gerardth on 27/11/2016.
  */
 
-public class ListActivity extends android.app.ListActivity {
+public class ListaRestaurantes extends android.app.ListActivity {
 
     private FirebaseDatabase reference = FirebaseDatabase.getInstance();
     private DatabaseReference mDatabase;

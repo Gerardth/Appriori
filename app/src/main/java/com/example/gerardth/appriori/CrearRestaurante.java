@@ -14,8 +14,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.gerardth.appriori.database.FirebaseDB;
-import com.example.gerardth.appriori.objects.Appriori;
 import com.example.gerardth.appriori.objects.Restaurante;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -31,26 +29,29 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks, LocationListener {
 
     Restaurante restaurante;
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     private static final int PETICION_PERMISO_LOCALIZACION = 101;
 
     private GoogleMap mMap;
     private CameraUpdate camara = null;
-    public LatLng centro;
-    public LatLng coord = centro;
+    public LatLng centro = null;
+    public LatLng coord = null;
     GoogleApiClient apiClient;
 
     EditText txtNombre;
     EditText txtDescripcion;
     EditText txtDireccion;
 
-    FirebaseDB firebase;
+    private FirebaseDatabase reference = FirebaseDatabase.getInstance();
+    private DatabaseReference mDatabase;
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,8 +79,8 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
         } else {
             // Show rationale and request permission.
         }
-        if(centro != null) camara = CameraUpdateFactory.newLatLngZoom(centro,18);
-        else  camara = CameraUpdateFactory.newLatLngZoom(new LatLng(4.601586, -74.065274), 18);
+        if(centro != null) camara = CameraUpdateFactory.newLatLngZoom(centro,14);
+        else camara = CameraUpdateFactory.newLatLngZoom(new LatLng(4.636130555880344, -74.08310115337372), 16);
         mMap.animateCamera(camara);
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -91,9 +92,6 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
                 ponerMarcador(coord,"","");
                 camara = CameraUpdateFactory.newLatLng(coord);
                 mMap.animateCamera(camara);
-                /*Projection proj = mMap.getProjection();
-                Point coordenada = proj.toScreenLocation(latLng);
-                centro = new LatLng(coordenada.l);*/
             }
         });
     }
@@ -127,11 +125,21 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
             Toast.makeText(getApplicationContext(), R.string.info_incomplete, Toast.LENGTH_SHORT).show();
         }
         else {
-            firebase.crearRestaurante(nombre, descripcion, direccion, coord);
+            crearRestaurante(nombre, descripcion, direccion, coord);
             Toast.makeText(getApplicationContext(), R.string.info_complete, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getApplicationContext(), CrearMenu.class);
             startActivity(intent);
         }
+    }
+
+    public void crearRestaurante(String nombre, String descripcion, String direccion, LatLng coord){
+        mDatabase = reference.getReference("restaurantes").child(user.getUid());
+
+        mDatabase.child("nombre").setValue(nombre);
+        mDatabase.child("descripcion").setValue(descripcion);
+        mDatabase.child("direccion").setValue(direccion);
+        mDatabase.child("coordenadas").child("latitud").setValue(coord.latitude);
+        mDatabase.child("coordenadas").child("longitud").setValue(coord.longitude);
     }
 
     @Override
@@ -148,11 +156,15 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PETICION_PERMISO_LOCALIZACION);
-        } else {
 
             Location lastLocation =
                     LocationServices.FusedLocationApi.getLastLocation(apiClient);
             centro = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        } else {
+
+            /*Location lastLocation =
+                    LocationServices.FusedLocationApi.getLastLocation(apiClient);
+            centro = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());*/
         }
     }
 

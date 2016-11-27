@@ -12,7 +12,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.gerardth.appriori.database.FirebaseDB;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -28,6 +27,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -36,8 +36,14 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Iterator;
 
 /**
  * Created by Gerardth on 25/09/2016.
@@ -54,7 +60,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    FirebaseDB firebase;
     private FirebaseDatabase reference = FirebaseDatabase.getInstance();
     private DatabaseReference mDatabase;
 
@@ -111,26 +116,67 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-
         //FIREBASE
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = reference.getReference("usuarios");
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    // User is signed in
-                    Toast.makeText(getApplicationContext(), "LOGUEADO " + user, Toast.LENGTH_SHORT).show();
-                    //preguntarTipo();
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    mDatabase.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.exists()){
+                                Toast.makeText(Login.this, "HOLAAAAAAAAAAAAAA",
+                                        Toast.LENGTH_LONG).show();
+                                redireccionar();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                        }
+                    });
+
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                // ...
             }
         };
+    }
+
+    private void redireccionar() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        mDatabase = reference.getReference("usuarios/" + user.getUid());
+        final String[] tipo = new String[1];
+        mDatabase.child("tipo").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    tipo[0] = dataSnapshot.getValue(String.class).toString();
+                    Intent intent = new Intent();
+                    switch(tipo[0]){
+                        case "dueño":
+                            intent = new Intent(Login.this, HacerPedido.class);
+                            break;
+
+                        case "usuario":
+                            intent = new Intent(Login.this, MapsActivity.class);
+                            break;
+                    }
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

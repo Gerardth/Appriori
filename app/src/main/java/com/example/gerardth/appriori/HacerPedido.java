@@ -8,17 +8,18 @@ import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.gerardth.appriori.MapsActivity;
-import com.example.gerardth.appriori.database.FirebaseDB;
 import com.example.gerardth.appriori.objects.Pedido;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class HacerPedido extends AppCompatActivity {
 
     public Spinner spinnerSopa, spinnerEntrada, spinnerProteina, spinnerJugo;
     String sopa, entrada, proteina, jugo;
-    FirebaseDB firebase;
+    private FirebaseDatabase reference = FirebaseDatabase.getInstance();
+    private DatabaseReference mDatabase;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
@@ -84,10 +85,19 @@ public class HacerPedido extends AppCompatActivity {
             //TODO ARMAR EL PEDIDO PARA ENVIARLO A LA DB
             Toast.makeText(getApplicationContext(), R.string.info_complete, Toast.LENGTH_SHORT).show();
             Pedido pedido = new Pedido(sopa, entrada, proteina, jugo);
-            firebase.crearPedido(user.getUid(), pedido);
+            crearPedido(user.getUid(), pedido);
             Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
             startActivity(intent);
         }
+    }
+
+    public void crearPedido(String id, Pedido pedido){
+        mDatabase = reference.getReference("restaurantes").child(id).child("pedido");//TODO REVISAR
+
+        mDatabase.child("sopa").setValue(sopa);
+        mDatabase.child("entrada").setValue(entrada);
+        mDatabase.child("proteina").setValue(proteina);
+        mDatabase.child("jugo").setValue(jugo);
     }
 
 }
