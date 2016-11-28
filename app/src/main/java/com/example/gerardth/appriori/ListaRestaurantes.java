@@ -60,9 +60,9 @@ public class ListaRestaurantes extends ListActivity {
                     LatLng coord = new LatLng(Double.parseDouble(snap.child("coordenadas").child("latitud").getValue().toString()),
                             Double.parseDouble(snap.child("coordenadas").child("longitud").getValue().toString()));
 
-                    Restaurante rest = new Restaurante(snap.getKey(), snap.child("nombre").getValue().toString(),
-                            snap.child("descripcion").getValue().toString(), snap.child("direccion").getValue().toString(),
-                            coord, null);
+                    Restaurante rest = new Restaurante(snap.child("nombre").getValue().toString(),
+                            snap.child("descripcion").getValue().toString(), snap.child("direccion").getValue().toString(), coord);
+                    rest.id = snap.getKey();
                     agregar(rest);
                 }
                 //ListView listView = (ListView) findViewById(R.id.lista);

@@ -50,8 +50,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Loading" >
-        </activity>
 
         <activity
             android:name=".Login"
@@ -76,6 +74,11 @@
         <activity
             android:name=".ListaRestaurantes"
             android:label="Lista de restaurantes" >
+        </activity>
+
+        <activity
+            android:name=".ListaPedidos"
+            android:label="Lista de pedidos" >
         </activity>
     </application>
 
