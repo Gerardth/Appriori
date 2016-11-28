@@ -3,4 +3,6 @@
         android:title="Cerrar sesión"  />
     <item android:id="@+id/lista"
         android:title="Mostrar lista de Restaurantes"  />
+    <item android:id="@+id/mapa"
+        android:title="Mostrar Mapa"  />
 </menu>

@@ -134,12 +134,15 @@ public class CrearRestaurante extends AppCompatActivity implements OnMapReadyCal
 
     public void crearRestaurante(String nombre, String descripcion, String direccion, LatLng coord){
         mDatabase = reference.getReference("restaurantes").child(user.getUid());
+        Restaurante restaurante = new Restaurante(nombre, descripcion, direccion, coord);
 
-        mDatabase.child("nombre").setValue(nombre);
+        mDatabase.setValue(nombre);
+
+        /*mDatabase.child("nombre").setValue(nombre);
         mDatabase.child("descripcion").setValue(descripcion);
         mDatabase.child("direccion").setValue(direccion);
         mDatabase.child("coordenadas").child("latitud").setValue(coord.latitude);
-        mDatabase.child("coordenadas").child("longitud").setValue(coord.longitude);
+        mDatabase.child("coordenadas").child("longitud").setValue(coord.longitude);*/
     }
 
     @Override

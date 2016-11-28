@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.gerardth.appriori.objects.Menu;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -77,11 +78,14 @@ public class CrearMenu extends AppCompatActivity {
 
     public void crearMenu(String id, String[] sopa, String[] entrada, String[] proteina, String[] jugo){
         mDatabase = reference.getReference("restaurantes").child(id).child("menu");
+        Menu menu = new Menu(convertirALista(sopa), convertirALista(entrada), convertirALista(proteina), convertirALista(jugo));
 
-        mDatabase.child("sopa").setValue(convertirALista(sopa));
+        mDatabase.setValue(menu);
+
+        /*mDatabase.child("sopa").setValue(convertirALista(sopa));
         mDatabase.child("entrada").setValue(convertirALista(entrada));
         mDatabase.child("proteina").setValue(convertirALista(proteina));
-        mDatabase.child("jugo").setValue(convertirALista(jugo));
+        mDatabase.child("jugo").setValue(convertirALista(jugo));*/
     }
 
     private List<String> convertirALista(String[] lista) {

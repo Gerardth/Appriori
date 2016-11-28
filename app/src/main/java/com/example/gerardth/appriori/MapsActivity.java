@@ -35,6 +35,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<Restaurante> restaurantes = new ArrayList<>();
     GoogleApiClient apiClient;
     private LocationRequest locRequest;
+    private String markerId;
 
     private static final int PETICION_PERMISO_LOCALIZACION = 101;
     private static final int PETICION_CONFIG_UBICACION = 201;
@@ -97,8 +99,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     DataSnapshot snap = iterator.next();
                     LatLng coord = new LatLng(Double.parseDouble(snap.child("coordenadas").child("latitud").getValue().toString()),
                             Double.parseDouble(snap.child("coordenadas").child("longitud").getValue().toString()));
-                    Restaurante rest = new Restaurante(null, snap.child("nombre").getValue().toString(),
-                            snap.child("descripcion").getValue().toString(), null, coord, null);
+                    Restaurante rest = new Restaurante(snap.child("nombre").getValue().toString(),
+                            snap.child("descripcion").getValue().toString(), null, coord);
+                    rest.id = snap.getKey();
                     agregar(rest);
                 }
                 crearMarcadores(obtenerRestaurantes());
@@ -127,9 +130,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(intent);
     }
 
+    private String obtenerId(String nombre) {
+        for(int i = 0; i < restaurantes.size(); i++){
+            if(restaurantes.get(i).nombre.equals(nombre)) return restaurantes.get(i).id;
+        }
+        return null;
+    }
+
     private void crearMapa() {
 
         mMap.clear();
+        markerId = null;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);//Seteamos el tipo de mapa
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
@@ -143,6 +154,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(centro != null) camara = CameraUpdateFactory.newLatLngZoom(centro,18);
         else  camara = CameraUpdateFactory.newLatLngZoom(new LatLng(4.636130555880344, -74.08310115337372), 15);
         mMap.animateCamera(camara);
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if(!marker.getId().equals(markerId)) markerId = marker.getId();
+                else{
+                    Intent i = new Intent(getApplicationContext(), HacerPedido.class);
+                    i.putExtra("restaurante", obtenerId(marker.getTitle()));
+                    markerId = null;
+                    startActivity(i);
+                }
+                return false;
+            }
+        });
     }
 
     private void enableLocationUpdates(){
@@ -238,7 +263,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .setNegativeButton("No", null)
                 .show();
     }
-
 
     /**
      * Manipulates the map once available.
