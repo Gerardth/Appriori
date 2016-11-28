@@ -20,6 +20,8 @@ public class Restaurante {
         //TODO ALMACENAR ESTA INFORMACION EN LA BASE DE DATOS
     }
 
+    public Restaurante(){}
+
     @Override
     public String toString(){
         return "Nombre: " + nombre + "\n" +
