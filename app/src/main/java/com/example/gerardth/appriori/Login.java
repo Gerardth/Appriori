@@ -127,56 +127,24 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                 if (user != null) {
                     mDatabase.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if(dataSnapshot.exists()){
-                                Toast.makeText(Login.this, "HOLAAAAAAAAAAAAAA",
-                                        Toast.LENGTH_LONG).show();
+                        public void onDataChange(DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                // TODO: handle the case where the data already exists
                                 redireccionar();
+                            }
+                            else {
                             }
                         }
 
                         @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                        }
+                        public void onCancelled(DatabaseError firebaseError) { }
                     });
-
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
             }
         };
-    }
-
-    private void redireccionar() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        mDatabase = reference.getReference("usuarios/" + user.getUid());
-        final String[] tipo = new String[1];
-        mDatabase.child("tipo").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()){
-                    tipo[0] = dataSnapshot.getValue(String.class).toString();
-                    Intent intent = new Intent();
-                    switch(tipo[0]){
-                        case "dueño":
-                            intent = new Intent(Login.this, HacerPedido.class);
-                            break;
-
-                        case "usuario":
-                            intent = new Intent(Login.this, MapsActivity.class);
-                            break;
-                    }
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override
@@ -307,7 +275,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
     public void crearUsuario(String tipo) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        mDatabase = reference.getReference("Usuarios").child(user.getUid());
+        mDatabase = reference.getReference("usuarios").child(user.getUid());
         //Usuario usuario = new Usuario(user.getDisplayName(), user.getEmail(), tipo);
 
         mDatabase.child("nombre").setValue(user.getDisplayName());
@@ -324,5 +292,40 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
 
+    }
+
+    private void redireccionar() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mDatabase = reference.getReference("usuarios/" + user.getUid());
+        System.out.println("DATABASEEE" + mDatabase);
+        final String[] tipo = new String[1];
+        tipo[0] = "tmp";
+        mDatabase.child("tipo").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    tipo[0] = dataSnapshot.getValue(String.class).toString();
+                    Intent intent = new Intent();
+                    System.out.println("USUARIOOOO" + tipo[0]);
+                    switch(tipo[0]){
+                        case "dueño":
+                            intent = new Intent(Login.this, ListaPedidos.class);
+                            //intent = new Intent(SplashScreen.this, MapsActivity.class);
+                            break;
+
+                        case "usuario":
+                            intent = new Intent(Login.this, MapsActivity.class);
+                            break;
+                    }
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

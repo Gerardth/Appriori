@@ -34,8 +34,9 @@ public class HacerPedido extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pedido);
-
+        menu = new Menu();
         Intent i = getIntent();
         id = i.getStringExtra("restaurante");
 
@@ -45,6 +46,11 @@ public class HacerPedido extends AppCompatActivity {
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     menu = snapshot.getValue(Menu.class);
+
+                    spinnerSopa.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, menu.sopa));
+                    spinnerJugo.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, menu.jugo));
+                    spinnerEntrada.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, menu.entrada));
+                    spinnerProteina.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, menu.proteina));
                 }
                 else {}
             }
@@ -60,7 +66,7 @@ public class HacerPedido extends AppCompatActivity {
         spinnerProteina = (Spinner)findViewById(R.id.spinnerProteina);
         spinnerJugo = (Spinner)findViewById(R.id.spinnerJugo);
 
-        spinnerSopa.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, menu.sopa));
+
         spinnerSopa.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {// cuando se cambia el filtro
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -68,11 +74,11 @@ public class HacerPedido extends AppCompatActivity {
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                sopa = "";
+                sopa = "sin sopa";
             }
         });
 
-        spinnerEntrada.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, menu.entrada));
+
         spinnerEntrada.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {// cuando se cambia el filtro
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -80,11 +86,11 @@ public class HacerPedido extends AppCompatActivity {
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                entrada = "";
+                entrada = "sin entrada";
             }
         });
 
-        spinnerProteina.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, menu.proteina));
+
         spinnerProteina.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {// cuando se cambia el filtro
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -92,11 +98,10 @@ public class HacerPedido extends AppCompatActivity {
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                proteina = "";
+                proteina = "sin proteina";
             }
         });
 
-        spinnerJugo.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, menu.jugo));
         spinnerJugo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {// cuando se cambia el filtro
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -104,13 +109,13 @@ public class HacerPedido extends AppCompatActivity {
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                jugo = "";
+                jugo = "sin jugo";
             }
         });
     }
 
     public void hacerPedido(View v){
-        if(sopa.equals("") || entrada.equals("") || proteina.equals("") || jugo.equals("")){
+        if(sopa.equals("sin sopa") && entrada.equals("sin entrada") && proteina.equals("sin proteina") && jugo.equals("sin jugo")){
             Toast.makeText(getApplicationContext(), R.string.info_incomplete, Toast.LENGTH_SHORT).show();
             //showDialog("Valores vacíos", "Ingrese todos los valores correctamente.", MainActivity.class);
         }
@@ -118,7 +123,7 @@ public class HacerPedido extends AppCompatActivity {
 
             Toast.makeText(getApplicationContext(), R.string.info_complete, Toast.LENGTH_SHORT).show();
             Pedido pedido = new Pedido(sopa, entrada, proteina, jugo);
-            crearPedido(user.getUid(), pedido);
+            crearPedido(id, pedido);
             Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
             startActivity(intent);
         }
@@ -127,7 +132,7 @@ public class HacerPedido extends AppCompatActivity {
     public void crearPedido(String id, Pedido pedido){
         mDatabase = reference.getReference("restaurantes").child(id).child("pedido").child(user.getUid());
 
-        mDatabase.child("pedido").setValue(pedido);
+        mDatabase.setValue(pedido);
     }
 
 }

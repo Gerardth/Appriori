@@ -1,10 +1,8 @@
 package com.example.gerardth.appriori;
 
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,7 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.gerardth.appriori.objects.Menu;
 import com.example.gerardth.appriori.objects.Restaurante;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,9 +23,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by Gerardth on 27/11/2016.
@@ -68,7 +63,7 @@ public class ListaRestaurantes extends ListActivity {
                 //ListView listView = (ListView) findViewById(R.id.lista);
                 //ArrayAdapter<Restaurante> adapter = new ArrayAdapter<Restaurante>(getApplicationContext(), android.R.layout.simple_list_item_1, restaurantes);
                 //listView.setListAdapter(adapter);
-                //setListAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, restaurantes));
+                setListAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, restaurantes));
             }
 
             @Override
@@ -114,7 +109,7 @@ public class ListaRestaurantes extends ListActivity {
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
+        inflater.inflate(R.menu.options_menu_owner, menu);
         return true;
 
     }

@@ -39,7 +39,8 @@ public class ListaPedidos extends ListActivity {
                 limpiar();
                 Iterator<DataSnapshot> iterator = snapshot.getChildren().iterator();
                 while(iterator.hasNext()){
-                    Pedido pedido = snapshot.getValue(Pedido.class);
+                    DataSnapshot snap = iterator.next();
+                    Pedido pedido = snap.getValue(Pedido.class);
                     agregar(pedido);
                 }
             }
@@ -50,8 +51,8 @@ public class ListaPedidos extends ListActivity {
             }
         });
 
-        ListView listView = (ListView) findViewById(R.id.lista);
-        setListAdapter(new ArrayAdapter<Pedido>(this, android.R.layout.simple_list_item_1, pedidos));
+        /*ListView listView = (ListView) findViewById(R.id.lista);
+        setListAdapter(new ArrayAdapter<Pedido>(this, android.R.layout.simple_list_item_1, pedidos));*/
     }
 
     public void limpiar(){ pedidos.clear(); }

@@ -71,7 +71,7 @@ public class CrearMenu extends AppCompatActivity {
         else {
             crearMenu(user.getUid(), sopa, entrada, proteina, jugo);
             Toast.makeText(getApplicationContext(), R.string.info_complete, Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+            Intent intent = new Intent(getApplicationContext(), ListaPedidos.class);
             startActivity(intent);
         }
     }

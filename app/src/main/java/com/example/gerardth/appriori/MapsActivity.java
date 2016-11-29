@@ -97,8 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
                 while(iterator.hasNext()){
                     DataSnapshot snap = iterator.next();
-                    LatLng coord = new LatLng(Double.parseDouble(snap.child("coordenadas").child("latitud").getValue().toString()),
-                            Double.parseDouble(snap.child("coordenadas").child("longitud").getValue().toString()));
+                    LatLng coord = new LatLng(Double.parseDouble(snap.child("coord").child("latitude").getValue().toString()),
+                            Double.parseDouble(snap.child("coord").child("longitude").getValue().toString()));
                     Restaurante rest = new Restaurante(snap.child("nombre").getValue().toString(),
                             snap.child("descripcion").getValue().toString(), null, coord);
                     rest.id = snap.getKey();
@@ -193,21 +193,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 switch (status.getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
 
-                        Toast.makeText(getApplicationContext(), "Configuración correcta", Toast.LENGTH_SHORT).show();
                         startLocationUpdates();
                         break;
 
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
-                            Toast.makeText(getApplicationContext(), "Se requiere actuación del usuario", Toast.LENGTH_SHORT).show();
                             status.startResolutionForResult(MapsActivity.this, PETICION_CONFIG_UBICACION);
                         } catch (IntentSender.SendIntentException e) {
-                            Toast.makeText(getApplicationContext(), "Error al intentar solucionar configuración de ubicación", Toast.LENGTH_SHORT).show();
                         }
                         break;
 
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Toast.makeText(getApplicationContext(), "No se puede cumplir la configuración de ubicación necesaria", Toast.LENGTH_SHORT).show();
                         disableLocationUpdates();
                         break;
                 }
@@ -221,8 +217,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             //Ojo: estamos suponiendo que ya tenemos concedido el permiso.
             //Sería recomendable implementar la posible petición en caso de no tenerlo.
-
-            Toast.makeText(getApplicationContext(), "Inicio de recepción de ubicaciones", Toast.LENGTH_SHORT).show();
 
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     apiClient, locRequest, MapsActivity.this);
@@ -344,7 +338,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         startLocationUpdates();
                         break;
                     case FragmentActivity.RESULT_CANCELED:
-                        Toast.makeText(getApplicationContext(), "El usuario no ha realizado los cambios de configuración necesarios", Toast.LENGTH_SHORT).show();
                         disableLocationUpdates();
                         break;
                 }
@@ -363,7 +356,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
+        inflater.inflate(R.menu.options_menu_user, menu);
         return true;
 
     }
