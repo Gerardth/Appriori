@@ -17,7 +17,6 @@ public class Restaurante {
         this.descripcion = descripcion;
         this.direccion = direccion;
         this.coord = coord;
-        //TODO ALMACENAR ESTA INFORMACION EN LA BASE DE DATOS
     }
 
     public Restaurante(){}
@@ -25,7 +24,7 @@ public class Restaurante {
     @Override
     public String toString(){
         return "Nombre: " + nombre + "\n" +
-                "Descripción" + descripcion + "\n" +
-                "Dirección" + direccion + "\n";
+                "Descripción: " + descripcion + "\n" +
+                "Dirección: " + direccion + "\n";
     }
 }

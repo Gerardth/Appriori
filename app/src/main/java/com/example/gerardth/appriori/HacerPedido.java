@@ -41,11 +41,13 @@ public class HacerPedido extends AppCompatActivity {
         id = i.getStringExtra("restaurante");
 
         mDatabase = reference.getReference("restaurantes/" + id);
+        System.out.println("IDDDDD" + id);
         mDatabase.child("menu").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     menu = snapshot.getValue(Menu.class);
+                    System.out.println("PEDIDOOOOO");
 
                     spinnerSopa.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, menu.sopa));
                     spinnerJugo.setAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, menu.jugo));
@@ -122,7 +124,7 @@ public class HacerPedido extends AppCompatActivity {
         else {
 
             Toast.makeText(getApplicationContext(), R.string.info_complete, Toast.LENGTH_SHORT).show();
-            Pedido pedido = new Pedido(sopa, entrada, proteina, jugo);
+            Pedido pedido = new Pedido(user.getDisplayName(), sopa, entrada, proteina, jugo);
             crearPedido(id, pedido);
             Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
             startActivity(intent);

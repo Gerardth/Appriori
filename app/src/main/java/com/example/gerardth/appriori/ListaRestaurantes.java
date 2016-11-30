@@ -1,6 +1,6 @@
 package com.example.gerardth.appriori;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuInflater;
@@ -29,7 +29,7 @@ import java.util.Iterator;
  * Created by Gerardth on 27/11/2016.
  */
 
-public class ListaRestaurantes extends ListActivity {
+public class ListaRestaurantes extends Activity {
 
     private FirebaseDatabase reference = FirebaseDatabase.getInstance();
     private DatabaseReference mDatabase;
@@ -40,10 +40,12 @@ public class ListaRestaurantes extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
+        setContentView(R.layout.activity_lista_restaurantes);
+
+        final ListView listView = (ListView) findViewById(R.id.list);
 
         mDatabase = reference.getReference("restaurantes");
-        final Query restauranteQuery = mDatabase.orderByChild("coordenadas");
+        final Query restauranteQuery = mDatabase.orderByChild("coord");
         restauranteQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -52,18 +54,16 @@ public class ListaRestaurantes extends ListActivity {
                 while(iterator.hasNext()){
                     DataSnapshot snap = iterator.next();
 
-                    LatLng coord = new LatLng(Double.parseDouble(snap.child("coordenadas").child("latitud").getValue().toString()),
-                            Double.parseDouble(snap.child("coordenadas").child("longitud").getValue().toString()));
+                    LatLng coord = new LatLng(Double.parseDouble(snap.child("coord").child("latitude").getValue().toString()),
+                            Double.parseDouble(snap.child("coord").child("longitude").getValue().toString()));
 
                     Restaurante rest = new Restaurante(snap.child("nombre").getValue().toString(),
                             snap.child("descripcion").getValue().toString(), snap.child("direccion").getValue().toString(), coord);
                     rest.id = snap.getKey();
                     agregar(rest);
                 }
-                //ListView listView = (ListView) findViewById(R.id.lista);
-                //ArrayAdapter<Restaurante> adapter = new ArrayAdapter<Restaurante>(getApplicationContext(), android.R.layout.simple_list_item_1, restaurantes);
-                //listView.setListAdapter(adapter);
-                setListAdapter(new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, restaurantes));
+                ArrayAdapter<Restaurante> adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, restaurantes);
+                listView.setAdapter(adapter);
             }
 
             @Override
@@ -72,15 +72,15 @@ public class ListaRestaurantes extends ListActivity {
             }
         });
 
-        mList = (ListView) findViewById(R.id.lista);
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() { // seleccionar un evento
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() { // seleccionar un evento
             public void onItemClick(AdapterView parent, View view,
                                     int position, long id) {
                 // selected item
-                String nombre = ((TextView) view).getText().toString();
+                String string = ((TextView) view).getText().toString();
+                String[] nombre = string.split("\n");
 
                 Intent i = new Intent(getApplicationContext(), HacerPedido.class);
-                i.putExtra("restaurante", obtenerId(nombre));
+                i.putExtra("restaurante", obtenerId(nombre[0]));
                 startActivity(i);
             }
         });
@@ -88,7 +88,8 @@ public class ListaRestaurantes extends ListActivity {
 
     private String obtenerId(String nombre) {
         for(int i = 0; i < restaurantes.size(); i++){
-            if(restaurantes.get(i).nombre.equals(nombre)) return restaurantes.get(i).id;
+            String name = "Nombre: " + restaurantes.get(i).nombre;
+            if(name.equals(nombre)) return restaurantes.get(i).id;
         }
         return null;
     }
@@ -109,7 +110,7 @@ public class ListaRestaurantes extends ListActivity {
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu_owner, menu);
+        inflater.inflate(R.menu.options_menu_user, menu);
         return true;
 
     }

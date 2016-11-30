@@ -281,7 +281,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         mDatabase.child("nombre").setValue(user.getDisplayName());
         mDatabase.child("correo").setValue(user.getEmail());
         mDatabase.child("tipo").setValue(tipo);
-        System.out.println("TIPOOOOOOOO " + mDatabase.child("tipo").toString());
 
         Intent intent;
         if(tipo.equals("dueño")){
@@ -297,7 +296,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
     private void redireccionar() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = reference.getReference("usuarios/" + user.getUid());
-        System.out.println("DATABASEEE" + mDatabase);
         final String[] tipo = new String[1];
         tipo[0] = "tmp";
         mDatabase.child("tipo").addValueEventListener(new ValueEventListener() {
@@ -306,7 +304,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                 if(dataSnapshot.exists()){
                     tipo[0] = dataSnapshot.getValue(String.class).toString();
                     Intent intent = new Intent();
-                    System.out.println("USUARIOOOO" + tipo[0]);
                     switch(tipo[0]){
                         case "dueño":
                             intent = new Intent(Login.this, ListaPedidos.class);

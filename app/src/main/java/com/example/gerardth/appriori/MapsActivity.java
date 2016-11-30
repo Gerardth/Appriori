@@ -89,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
 
         mDatabase = reference.getReference("restaurantes");
-        Query restauranteQuery = mDatabase.orderByChild("coordenadas");
+        Query restauranteQuery = mDatabase.orderByChild("coord");
         restauranteQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -97,8 +97,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
                 while(iterator.hasNext()){
                     DataSnapshot snap = iterator.next();
+
                     LatLng coord = new LatLng(Double.parseDouble(snap.child("coord").child("latitude").getValue().toString()),
                             Double.parseDouble(snap.child("coord").child("longitude").getValue().toString()));
+
                     Restaurante rest = new Restaurante(snap.child("nombre").getValue().toString(),
                             snap.child("descripcion").getValue().toString(), null, coord);
                     rest.id = snap.getKey();
@@ -294,7 +296,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(apiClient);
 
             if(lastLocation != null) centro = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-            System.out.println("CENTROOOO " + centro);
         }
 
         enableLocationUpdates();
